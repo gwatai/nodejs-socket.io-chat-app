@@ -5,6 +5,8 @@ const port = 8000;
 
 const {chat} = require('./controllers/chat');
 
+const {main} = require('./db')
+
 //sqlite setup
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('database.db', err => {

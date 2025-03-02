@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const router = express.Router()
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
@@ -7,6 +8,8 @@ const io = new Server(server,
     // maxHttpBufferSize = 10000,
     // pingTimeout = 60000,
 );
+const {storeChat, run} = require('../db')
+
 
 
 app.use(express.static(__dirname));
@@ -76,11 +79,19 @@ io.on('connection', (socket) => {
         try{
     if(socket.userType){
         console.log('chat message: ' + msg);
-        io.to('counselling-room').emit('chat message', {
+        try{        io.to('counselling-room').emit('chat message', {
             message: msg,
             sender: socket.userType,
             SenderId: socket.id
         });
+        storeChat({
+            user: socket.userType,
+            message: msg
+        })
+    }catch(err)
+    {
+        console.log("chat error",err)
+    }
     }
     }catch(err){
         console.log('error in chat message: ', err);
@@ -99,9 +110,25 @@ io.on('connection', (socket) => {
 });
 
 
+const loadClientMessages = async (req, res) => {
 
+    try{
+
+
+    const {user} = req.body
+    const messages =  await run()
+    console.log("messages api res",messages)
+    res.status(200).json(messages)
+    }catch(err)
+    {
+        console.log("load messages error", err)
+    }
+}
+app.use(express.json())
+app.get('/api/user/chat', loadClientMessages)
 
 
 console.log('Websocket Server is running on http://localhost:3000');
 
 server.listen(3000);
+

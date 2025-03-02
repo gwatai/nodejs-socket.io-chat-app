@@ -3,7 +3,7 @@ storing messages logic
 
 user send message it is store in db:
 {
-    id, name, user_type, 
+    id, name, user_type, message, 
 }
 
 
